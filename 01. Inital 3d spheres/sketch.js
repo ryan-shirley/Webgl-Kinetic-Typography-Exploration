@@ -1,7 +1,7 @@
 // Inital camera positioning
 var easycam,
     state = {
-        distance: 250,
+        distance: 1000,
         center: [5, 3, -13],
         rotation: [0, 0, 0, 1]
     },
@@ -79,16 +79,21 @@ function setup() {
  * draw() Continuously Executing
  */
 function draw() {
-    // 3D section
+    // Background Colour
     background(32)
     lights()
-    box(50)
 
-    push()
-    translate(100, 0, 0)
-    // rotateX(map(mouseX, 0, width, 0, PI));
-    box(50)
-    pop()
+    // Create Line of balls
+    fill("yellow")
+    for (i = 0; i < 10; i++) {
+        push()
+        translate(75 * i, 0, 0)
+        sphere(25)
+
+        translate(0, 75 * 1, 0)
+        sphere(25)
+        pop()
+    }
 
     // Display HUD
     displayHud()
