@@ -1,19 +1,26 @@
+// Inital camera positioning
 var easycam,
     state = {
-        distance: 208,
+        distance: 250,
         center: [5, 3, -13],
-        rotation: [0.3, -0.4, -0.1, 0.85]
+        rotation: [0, 0, 0, 1]
     },
     x = 0,
     y = 20
 
+/**
+ * preload() Run before setup
+ * Load Font
+ */
 function preload() {
     f = loadFont("../fonts/Roboto-Regular.ttf")
 }
 
-function setup() {
-    createCanvas(windowWidth, windowHeight, WEBGL)
-    //setAttributes('antialias', true);
+/**
+ * setupHud() Setup the HUD
+ */
+function setupHud() {
+    setAttributes("antialias", true)
     easycam = createEasyCam()
     document.oncontextmenu = function() {
         return false
@@ -26,19 +33,15 @@ function setup() {
     // use the loaded font
     textFont(f)
     textSize(16)
-    stroke(50, 50, 52)
-    strokeWeight(0.5)
 }
 
-function draw() {
-    // 3D section
-    background(32)
-    lights()
-    box(100)
-
+/**
+ * displayHud() Display hud details
+ */
+function displayHud() {
     // 2D screen-aligned rendering section
     easycam.beginHUD()
-    this._renderer._enableLighting = false // fix for issue #1
+    // this._renderer._enableLighting = false // fix for issue #1
     let state = easycam.getState()
 
     // Render the background box for the HUD
@@ -62,4 +65,31 @@ function draw() {
     text(nfs(state.rotation, 1, 3), x + 125, y + 25 + 40)
     text(nfs(frameRate(), 1, 2), x + 125, y + 25 + 60)
     easycam.endHUD()
+}
+
+/**
+ * setup() Initial method run to setup project
+ */
+function setup() {
+    createCanvas(windowWidth, windowHeight, WEBGL)
+    setupHud()
+}
+
+/**
+ * draw() Continuously Executing
+ */
+function draw() {
+    // 3D section
+    background(32)
+    lights()
+    box(50)
+
+    push()
+    translate(100, 0, 0)
+    // rotateX(map(mouseX, 0, width, 0, PI));
+    box(50)
+    pop()
+
+    // Display HUD
+    displayHud()
 }
