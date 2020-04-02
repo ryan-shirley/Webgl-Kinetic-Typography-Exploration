@@ -1,0 +1,4 @@
+_libraries/
+fonts/
+*.pdf
+.DS_Store

@@ -1,2 +1,0 @@
-# Webgl-Kinetic-Typography-Exploration
- 
