@@ -138,21 +138,33 @@ function draw() {
         // Loop text Path
         for (let i = 0; i < path.commands.length; i++) {
             let pnt = path.commands[i]
-            
+
             // Lerp Colour
-            let from = color(218, 165, 32);
-            let to = color(72, 61, 139);
-            let percent = map(pnt.x, 0, 600, 0, 1);
-            // console.log(percent);
-            
+            let from = color(218, 165, 32)
+            let to = color(72, 61, 139)
+            let percent = map(pnt.x, 0, 600, 0, 1)
+
             let interA = lerpColor(from, to, percent)
+            let interB = lerpColor(to, from, percent)
             fill(interA)
 
             // Draw element
             push()
-            translate(pnt.x, pnt.y, sin(pnt.y + frameCount / 15) * 2)
-            sphere(ballSize)
-            // box(ballSize)
+            translate(pnt.x, pnt.y, sin(pnt.y + frameCount / 10) * 2)
+
+            // Rotate
+            // rotateX(frameCount * 0.01)
+            // rotate(frameCount * 0.03)
+
+            // sphere(ballSize)
+            box(ballSize)
+
+            fill(interB)
+            for (z = 1; z < 2; z++) {
+                translate(0, 0, z * 12)
+                sphere(ballSize * 1.2)
+            }
+
             pop()
         }
     }
