@@ -133,7 +133,7 @@ function draw() {
         // console.log(fontPath);
 
         let path = new g.Path(fontPath.commands)
-        path = g.resampleByLength(path, 10)
+        path = g.resampleByLength(path, 15)
 
         // Loop text Path
         for (let i = 0; i < path.commands.length; i++) {
@@ -160,12 +160,11 @@ function draw() {
             // rotateX(frameCount * 0.01)
             // rotate(frameCount * 0.03)
 
-            // sphere(ballSize)
-            box(ballSize)
+            torus(5, 2)
 
             fill(interB)
             for (z = 1; z < 2; z++) {
-                translate(0, 0, z * 12)
+                translate(0, 0, z * 3)
                 sphere(ballSize * 1.2)
             }
 
