@@ -139,6 +139,10 @@ function draw() {
         for (let i = 0; i < path.commands.length; i++) {
             let pnt = path.commands[i]
 
+            if (pnt.x > frameCount * 2 - 50) {
+                continue
+            }
+
             // Lerp Colour
             let from = color(218, 165, 32)
             let to = color(72, 61, 139)
