@@ -143,16 +143,17 @@ function draw() {
                 continue
             }
 
-            // Lerp Colour
-            let from = color(218, 165, 32)
-            let to = color(72, 61, 139)
-            let percent = map(pnt.x, 0, 600, 0, 1)
+            // Set alternating colours
+            let colour1, colour2
+            if (i % 2 == 0) {
+                colour1 = color(218, 165, 32)
+                colour2 = color(72, 61, 139)
+            } else {
+                colour1 = color(72, 61, 139)
+                colour2 = color(218, 165, 32)
+            }
 
-            let interA = lerpColor(from, to, percent)
-            let interB = lerpColor(to, from, percent)
-            fill(interA)
-
-            // Draw element
+            // Draw elements
             push()
             translate(pnt.x, pnt.y, sin(pnt.y + frameCount / 10) * 2)
 
@@ -160,9 +161,10 @@ function draw() {
             // rotateX(frameCount * 0.01)
             // rotate(frameCount * 0.03)
 
+            fill(colour1)
             torus(5, 2)
 
-            fill(interB)
+            fill(colour2)
             for (z = 1; z < 2; z++) {
                 translate(0, 0, z * 3)
                 sphere(ballSize * 1.2)
