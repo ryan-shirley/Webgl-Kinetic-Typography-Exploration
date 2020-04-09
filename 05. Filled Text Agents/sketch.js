@@ -1,22 +1,24 @@
 // Classes
-class Agent {
-    constructor(x, y, z, size) {
-        this.x = x
-        this.y = y
-        this.z = z
-        this.size = size
+class Letter {
+    constructor(character, points, letterWidth, offset) {
+        this.character = character
+        this.points = points
+        this.width = letterWidth
+        this.offset = offset
     }
 
     /**
      * draw() Draw agent on screen
      */
     draw() {
-        push()
+        this.points.forEach((pnt) => {
+            push()
 
-        translate(this.x, this.y, this.z * this.size)
-        sphere(this.size - this.size / 2)
+            translate(pnt.x + this.offset, pnt.y, pnt.z * pointDensity)
+            sphere(pointDensity / 2)
 
-        pop()
+            pop()
+        })
     }
 }
 
@@ -33,9 +35,9 @@ var easycam,
 // Type
 let font,
     textImg,
-    textTyped = "type",
-    pointDensity = 10,
-    agents = []
+    initString = "type",
+    letters = [],
+    pointDensity = 10
 
 /**
  * preload() Run before setup
@@ -46,7 +48,7 @@ function preload() {
     f = loadFont("../fonts/Roboto-Regular.ttf")
 
     // Interactive Font
-    font = loadFont("../fonts/Roboto-Medium.ttf")
+    font = loadFont("../fonts/Chalif Rough.ttf")
 }
 
 // utility function to get some GL/GLSL/WEBGL information
@@ -97,6 +99,14 @@ function displayHud() {
     // this._renderer._enableLighting = false // fix for issue #1
     let state = easycam.getState()
 
+    // Get number of points
+    let numPoints = 0
+    for(let l = 0; l < letters.length; l++) {
+        let letter = letters[l]
+
+        numPoints += letter.points.length
+    }
+
     // Render the background box for the HUD
     noStroke()
     fill(0)
@@ -111,7 +121,7 @@ function displayHud() {
     text("Rotation:", x + 35, y + 25 + 40)
     text("Framerate:", x + 35, y + 25 + 60)
     text("GPU Renderer:", x + 35, y + 25 + 80)
-    text("Total Agents:", x + 35, y + 25 + 100)
+    text("Total Points:", x + 35, y + 25 + 100)
 
     // Render the state numbers
     fill(0, 200, 0)
@@ -119,8 +129,8 @@ function displayHud() {
     text(nfs(state.center, 1, 2), x + 160, y + 25 + 20)
     text(nfs(state.rotation, 1, 3), x + 160, y + 25 + 40)
     text(nfs(frameRate(), 1, 2), x + 160, y + 25 + 60)
-    text(nfs(getGLInfo().gpu_renderer, 1, 2), x + 160, y + 25 + 80)
-    text(nfs(agents.length, 1, 0), x + 160, y + 25 + 100)
+    text(nfs(getGLInfo().gpu_renderer, 1, 2), x + 163, y + 25 + 80)
+    text(nfs(numPoints, 1, 0), x + 160, y + 25 + 100)
     easycam.endHUD()
 }
 
@@ -130,38 +140,16 @@ function displayHud() {
 function setup() {
     createCanvas(windowWidth, windowHeight, WEBGL)
     setupHud()
-    setupText()
+    initText()
     noStroke()
 }
 
 /**
- * setupText() Setup text to be drawn
+ * initText() Setup intial text to be drawn
  */
-function setupText() {
-    textImg = createGraphics(width, height)
-    textImg.pixelDensity(1)
-    textImg.background(255)
-    textImg.textFont(font)
-    textImg.textSize(250)
-    textImg.text(textTyped, 50, 200)
-    textImg.loadPixels()
-
-    // Create Agents
-    agents = []
-
-    for (let x = 0; x < textImg.width; x += pointDensity) {
-        for (let y = 0; y < textImg.height; y += pointDensity) {
-            let index = (x + y * textImg.width) * 4
-            let r = textImg.pixels[index]
-
-            if (r < 128) {
-                noStroke()
-
-                for (z = 0; z < 5; z++) {
-                    agents.push(new Agent(x, y, z, pointDensity))
-                }
-            }
-        }
+function initText() {
+    for (var i = 0; i < initString.length; i++) {
+        addLetter(initString.charAt(i))
     }
 }
 
@@ -169,8 +157,50 @@ function setupText() {
  * keyTyped() Add letter to text
  */
 function keyTyped() {
-    textTyped += key
-    setupText()
+    addLetter(key)
+}
+
+/**
+ * addLetter() Add letter to be displayed
+ */
+function addLetter(letter) {
+    // Create Graphic
+    textImg = createGraphics(width, height)
+    textImg.pixelDensity(1)
+    textImg.background(255)
+    textImg.textFont(font)
+    textImg.textSize(250)
+    textImg.text(letter, 50, 200)
+
+    // Load pixels for letter
+    textImg.loadPixels()
+
+    // Calculate offset
+    let offset = 0
+    for (let i = 0; i < letters.length; i++) {
+        offset += letters[i].width
+    }
+
+    // Create Points
+    points = []
+
+    for (let x = 0; x < textImg.width; x += pointDensity) {
+        for (let y = 0; y < textImg.height; y += pointDensity) {
+            let index = (x + y * textImg.width) * 4
+            let r = textImg.pixels[index]
+
+            if (r < 128) {
+                // Add multiple for depth
+                for (z = 0; z < 5; z++) {
+                    points.push(new p5.Vector(x, y, z))
+                }
+            }
+        }
+    }
+
+    // Add letter
+    letterObj = new Letter(letter, points, textImg.textWidth(letter), offset)
+    letters.push(letterObj)
 }
 
 /**
@@ -178,8 +208,7 @@ function keyTyped() {
  */
 function keyPressed() {
     if (keyCode === BACKSPACE) {
-        textTyped = textTyped.slice(0, -1)
-        setupText()
+        letters.pop()
     }
 }
 
@@ -194,13 +223,13 @@ function draw() {
     lights() // Flat lighting
     // pointLight(20, 20, 20, -5000, -500, 40000) // Front light (r, g, b, x, y, z)
     pointLight(205, 131, 200, 50, -500, -400) // Back
-    
+
     // Create Object material/colour
     // ambientMaterial(215, 151, 216)
     fill(247, 174, 248)
 
-    // Draw agents
-    agents.forEach((ag) => ag.draw())
+    // Draw letters
+    letters.forEach((l) => l.draw())
 
     // Display HUD
     displayHud()
