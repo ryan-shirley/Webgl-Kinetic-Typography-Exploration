@@ -1,32 +1,51 @@
+// Classes
+class Agent {
+    constructor(x, y, z, size) {
+        this.x = x
+        this.y = y
+        this.z = z
+        this.size = size
+    }
+
+    /**
+     * draw() Draw agent on screen
+     */
+    draw() {
+        push()
+
+        translate(this.x, this.y, this.z * this.size)
+        sphere(this.size - this.size / 2)
+
+        pop()
+    }
+}
+
 // Inital camera positioning
 var easycam,
     state = {
         distance: 500,
-        center: [300, -75, 0],
-        rotation: [-1, 0, 0, 0]
+        center: [300, 150, 0],
+        rotation: [-1, 0, 0, 0],
     },
     x = 0,
     y = 20
 
 // Type
-let font
-let textTyped = "type"
+let font,
+    textImg,
+    textTyped = "type",
+    pointDensity = 10
 
 /**
  * preload() Run before setup
  * Load Font
  */
 function preload() {
+    // HUD Font
     f = loadFont("../fonts/Roboto-Regular.ttf")
 
-    opentype.load("../fonts/FreeSans.otf", (err, f) => {
-        if (err) {
-            console.log(err)
-        } else {
-            font = f
-            console.log(font)
-        }
-    })
+    // Interactive Font
+    font = loadFont("../fonts/FreeSans.otf")
 }
 
 // utility function to get some GL/GLSL/WEBGL information
@@ -55,7 +74,7 @@ function getGLInfo() {
 function setupHud() {
     setAttributes("antialias", true)
     easycam = createEasyCam()
-    document.oncontextmenu = function() {
+    document.oncontextmenu = function () {
         return false
     }
 
@@ -108,22 +127,46 @@ function displayHud() {
 function setup() {
     createCanvas(windowWidth, windowHeight, WEBGL)
     setupHud()
+    setupText()
     noStroke()
+}
+
+/**
+ * setupText() Setup text to be drawn
+ */
+function setupText() {
+    textImg = createGraphics(width, height)
+    textImg.pixelDensity(1)
+    textImg.background(255)
+    textImg.textFont(font)
+    textImg.textSize(250)
+    textImg.text(textTyped, 50, 200)
+    textImg.loadPixels()
 }
 
 /**
  * draw() Continuously Executing
  */
 function draw() {
-    if (!font) return
-
     // Background Colour
     background(32)
     lights()
 
-    // Create Line of balls
-    fill("yellow")
+    for (let x = 0; x < textImg.width; x += pointDensity) {
+        for (let y = 0; y < textImg.height; y += pointDensity) {
+            let index = (x + y * textImg.width) * 4
+            let r = textImg.pixels[index]
 
+            if (r < 128) {
+                fill(247, 174, 248)
+                noStroke()
+
+                for (z = 0; z < 5; z++) {
+                    new Agent(x, y, z, pointDensity).draw()
+                }
+            }
+        }
+    }
 
     // Display HUD
     displayHud()
