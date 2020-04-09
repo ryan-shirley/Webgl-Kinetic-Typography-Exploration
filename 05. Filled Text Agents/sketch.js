@@ -46,7 +46,7 @@ function preload() {
     f = loadFont("../fonts/Roboto-Regular.ttf")
 
     // Interactive Font
-    font = loadFont("../fonts/FreeSans.otf")
+    font = loadFont("../fonts/Roboto-Medium.ttf")
 }
 
 // utility function to get some GL/GLSL/WEBGL information
@@ -155,7 +155,6 @@ function setupText() {
             let r = textImg.pixels[index]
 
             if (r < 128) {
-                fill(247, 174, 248)
                 noStroke()
 
                 for (z = 0; z < 5; z++) {
@@ -190,7 +189,15 @@ function keyPressed() {
 function draw() {
     // Background Colour
     background(32)
-    lights()
+
+    // Create lighting
+    lights() // Flat lighting
+    // pointLight(20, 20, 20, -5000, -500, 40000) // Front light (r, g, b, x, y, z)
+    pointLight(205, 131, 200, 50, -500, -400) // Back
+    
+    // Create Object material/colour
+    // ambientMaterial(215, 151, 216)
+    fill(247, 174, 248)
 
     // Draw agents
     agents.forEach((ag) => ag.draw())
