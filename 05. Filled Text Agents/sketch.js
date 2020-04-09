@@ -145,6 +145,24 @@ function setupText() {
 }
 
 /**
+ * keyTyped() Add letter to text
+ */
+function keyTyped() {
+    textTyped += key
+    setupText()
+}
+
+/**
+ * keyPressed() Handle the removal of letters
+ */
+function keyPressed() {
+    if (keyCode === BACKSPACE) {
+        textTyped = textTyped.slice(0, -1);
+        setupText()
+    }
+}
+
+/**
  * draw() Continuously Executing
  */
 function draw() {
