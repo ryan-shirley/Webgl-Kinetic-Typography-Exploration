@@ -100,9 +100,9 @@ function displayHud() {
     // Render the background box for the HUD
     noStroke()
     fill(0)
-    rect(x, y, 20, 120)
+    rect(x, y, 20, 140)
     fill(50, 50, 52, 20) // a bit of transparency
-    rect(x + 20, y, 450, 120)
+    rect(x + 20, y, 450, 140)
 
     // Render the labels
     fill(69, 161, 255)
@@ -111,6 +111,7 @@ function displayHud() {
     text("Rotation:", x + 35, y + 25 + 40)
     text("Framerate:", x + 35, y + 25 + 60)
     text("GPU Renderer:", x + 35, y + 25 + 80)
+    text("Total Agents:", x + 35, y + 25 + 100)
 
     // Render the state numbers
     fill(0, 200, 0)
@@ -119,6 +120,7 @@ function displayHud() {
     text(nfs(state.rotation, 1, 3), x + 160, y + 25 + 40)
     text(nfs(frameRate(), 1, 2), x + 160, y + 25 + 60)
     text(nfs(getGLInfo().gpu_renderer, 1, 2), x + 160, y + 25 + 80)
+    text(nfs(agents.length, 1, 0), x + 160, y + 25 + 100)
     easycam.endHUD()
 }
 
