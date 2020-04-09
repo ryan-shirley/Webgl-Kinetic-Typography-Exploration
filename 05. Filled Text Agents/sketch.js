@@ -34,7 +34,8 @@ var easycam,
 let font,
     textImg,
     textTyped = "type",
-    pointDensity = 10
+    pointDensity = 10,
+    agents = []
 
 /**
  * preload() Run before setup
@@ -142,6 +143,25 @@ function setupText() {
     textImg.textSize(250)
     textImg.text(textTyped, 50, 200)
     textImg.loadPixels()
+
+    // Create Agents
+    agents = []
+
+    for (let x = 0; x < textImg.width; x += pointDensity) {
+        for (let y = 0; y < textImg.height; y += pointDensity) {
+            let index = (x + y * textImg.width) * 4
+            let r = textImg.pixels[index]
+
+            if (r < 128) {
+                fill(247, 174, 248)
+                noStroke()
+
+                for (z = 0; z < 5; z++) {
+                    agents.push(new Agent(x, y, z, pointDensity))
+                }
+            }
+        }
+    }
 }
 
 /**
@@ -157,7 +177,7 @@ function keyTyped() {
  */
 function keyPressed() {
     if (keyCode === BACKSPACE) {
-        textTyped = textTyped.slice(0, -1);
+        textTyped = textTyped.slice(0, -1)
         setupText()
     }
 }
@@ -170,21 +190,8 @@ function draw() {
     background(32)
     lights()
 
-    for (let x = 0; x < textImg.width; x += pointDensity) {
-        for (let y = 0; y < textImg.height; y += pointDensity) {
-            let index = (x + y * textImg.width) * 4
-            let r = textImg.pixels[index]
-
-            if (r < 128) {
-                fill(247, 174, 248)
-                noStroke()
-
-                for (z = 0; z < 5; z++) {
-                    new Agent(x, y, z, pointDensity).draw()
-                }
-            }
-        }
-    }
+    // Draw agents
+    agents.forEach((ag) => ag.draw())
 
     // Display HUD
     displayHud()
