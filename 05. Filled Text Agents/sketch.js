@@ -6,6 +6,7 @@ class Letter {
         this.width = letterWidth
         this.offset = offset
         this.disappearingStarted
+        this.createdAt = millis()
     }
 
     /**
@@ -34,10 +35,45 @@ class Letter {
     }
 
     /**
+     * create() Draw creating annimation points on screen
+     */
+    create() {
+        this.points.forEach((pnt) => {
+            let timeTaken = (millis() - this.createdAt) / 1000,
+                percent = map(timeTaken, 0, timeToCreate, 0, 1),
+                startPos = createVector(
+                    state.center[0],
+                    state.center[1],
+                    state.center[2] + state.distance + 500
+                ),
+                endPos = createVector(
+                    pnt.x + this.offset,
+                    pnt.y,
+                    pnt.z * pointDensity
+                ),
+                lerpedPoint = p5.Vector.lerp(startPos, endPos, percent)
+
+            push()
+
+            translate(lerpedPoint.x, lerpedPoint.y, lerpedPoint.z)
+            sphere(pointDensity / 2)
+
+            pop()
+        })
+    }
+
+    /**
      * isRedundant() Check if letter is redundant
      */
     isRedundant() {
-        return (millis() - this.disappearingStarted) / 1000 >= 0.5
+        return (millis() - this.disappearingStarted) / 1000 >= timeToDisappear
+    }
+
+    /**
+     * isCreated() Check if letter is created and in place
+     */
+    isCreated() {
+        return (millis() - this.createdAt) / 1000 >= timeToCreate
     }
 }
 
@@ -56,8 +92,11 @@ let font,
     textImg,
     initString = "type",
     letters = [],
+    drawingLetters = [],
     disappearingLetters = [],
-    pointDensity = 10
+    pointDensity = 10,
+    timeToCreate = 0.5,
+    timeToDisappear = 0.5
 
 /**
  * preload() Run before setup
@@ -197,8 +236,15 @@ function addLetter(letter) {
 
     // Calculate offset
     let offset = 0
+
+    // Drawn letters
     for (let i = 0; i < letters.length; i++) {
         offset += letters[i].width
+    }
+
+    // Drawing letters
+    for (let i = 0; i < drawingLetters.length; i++) {
+        offset += drawingLetters[i].width
     }
 
     // Create Points
@@ -220,7 +266,7 @@ function addLetter(letter) {
 
     // Add letter
     letterObj = new Letter(letter, points, textImg.textWidth(letter), offset)
-    letters.push(letterObj)
+    drawingLetters.push(letterObj)
 }
 
 /**
@@ -252,6 +298,24 @@ function draw() {
     // ambientMaterial(215, 151, 216)
     fill(247, 174, 248)
 
+    // Draw creating letters
+    for (let i = 0; i < drawingLetters.length; i++) {
+        let l = drawingLetters[i]
+
+        // Check letters are redundant
+        if (l.isCreated()) {
+            // Remove
+            drawingLetters.splice(i, 1)
+
+            // Add to letters
+            letters.push(l)
+
+            break
+        } else {
+            // Draw
+            l.create()
+        }
+    }
     // Draw letters
     letters.forEach((l) => l.draw())
 
