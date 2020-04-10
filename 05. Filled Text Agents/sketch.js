@@ -5,7 +5,7 @@ class Letter {
         this.points = points
         this.width = letterWidth
         this.offset = offset
-        this.framesUntilDisappeared = 20
+        this.disappearingStarted
     }
 
     /**
@@ -33,16 +33,13 @@ class Letter {
 
         // Draw Points
         this.draw()
-
-        // Decrease frames left to display
-        this.framesUntilDisappeared -= 1
     }
 
     /**
      * isRedundant() Check if letter is redundant
      */
     isRedundant() {
-        return this.framesUntilDisappeared <= 0
+        return (millis() - this.disappearingStarted) / 1000 >= .5
     }
 }
 
@@ -234,7 +231,10 @@ function addLetter(letter) {
 function keyPressed() {
     if (keyCode === BACKSPACE) {
         let removalLetter = letters.pop()
-        removalLetter && disappearingLetters.push(removalLetter)
+        if (removalLetter) {
+            removalLetter.disappearingStarted = millis()
+            disappearingLetters.push(removalLetter)
+        } 
     }
 }
 
