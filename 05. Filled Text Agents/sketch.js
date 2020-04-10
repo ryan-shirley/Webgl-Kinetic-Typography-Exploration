@@ -27,9 +27,7 @@ class Letter {
      */
     disappear() {
         // Move Points
-        this.points.forEach((pnt, index) => {
-            this.points[index].y += 10
-        })
+        this.points.forEach((pnt, index) => (this.points[index].y += 10))
 
         // Draw Points
         this.draw()
@@ -39,7 +37,7 @@ class Letter {
      * isRedundant() Check if letter is redundant
      */
     isRedundant() {
-        return (millis() - this.disappearingStarted) / 1000 >= .5
+        return (millis() - this.disappearingStarted) / 1000 >= 0.5
     }
 }
 
@@ -213,7 +211,7 @@ function addLetter(letter) {
 
             if (r < 128) {
                 // Add multiple for depth
-                for (z = 0; z < 5; z++) {
+                for (z = 0; z < 3; z++) {
                     points.push(new p5.Vector(x, y, z))
                 }
             }
@@ -234,7 +232,7 @@ function keyPressed() {
         if (removalLetter) {
             removalLetter.disappearingStarted = millis()
             disappearingLetters.push(removalLetter)
-        } 
+        }
     }
 }
 
