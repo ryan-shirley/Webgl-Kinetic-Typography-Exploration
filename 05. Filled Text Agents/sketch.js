@@ -258,12 +258,13 @@ function draw() {
     letters.forEach((l) => l.draw())
 
     // Draw disappearing letters
-    disappearingLetters.forEach((l) => l.disappear())
+    disappearingLetters.forEach((l, i) => {
+        // Draw
+        l.disappear()
 
-    // Check letters are redundant
-    disappearingLetters.forEach(
-        (l, i) => l.isRedundant() && disappearingLetters.splice(i, 1)
-    )
+        // Check letters are redundant
+        l.isRedundant() && disappearingLetters.splice(i, 1)
+    })
 
     // Display HUD
     displayHud()
