@@ -5,10 +5,11 @@ class Letter {
         this.points = points
         this.width = letterWidth
         this.offset = offset
+        this.framesUntilDisappeared = 20
     }
 
     /**
-     * draw() Draw agent on screen
+     * draw() Draw points on screen
      */
     draw() {
         this.points.forEach((pnt) => {
@@ -19,6 +20,29 @@ class Letter {
 
             pop()
         })
+    }
+
+    /**
+     * disappear() Draw disappearing points on screen
+     */
+    disappear() {
+        // Move Points
+        this.points.forEach((pnt, index) => {
+            this.points[index].y += 10
+        })
+
+        // Draw Points
+        this.draw()
+
+        // Decrease frames left to display
+        this.framesUntilDisappeared -= 1
+    }
+
+    /**
+     * isRedundant() Check if letter is redundant
+     */
+    isRedundant() {
+        return this.framesUntilDisappeared <= 0
     }
 }
 
@@ -37,6 +61,7 @@ let font,
     textImg,
     initString = "type",
     letters = [],
+    disappearingLetters = [],
     pointDensity = 10
 
 /**
@@ -101,7 +126,7 @@ function displayHud() {
 
     // Get number of points
     let numPoints = 0
-    for(let l = 0; l < letters.length; l++) {
+    for (let l = 0; l < letters.length; l++) {
         let letter = letters[l]
 
         numPoints += letter.points.length
@@ -208,7 +233,8 @@ function addLetter(letter) {
  */
 function keyPressed() {
     if (keyCode === BACKSPACE) {
-        letters.pop()
+        let removalLetter = letters.pop()
+        disappearingLetters.push(removalLetter)
     }
 }
 
@@ -230,6 +256,14 @@ function draw() {
 
     // Draw letters
     letters.forEach((l) => l.draw())
+
+    // Draw disappearing letters
+    disappearingLetters.forEach((l) => l.disappear())
+
+    // Check letters are redundant
+    disappearingLetters.forEach(
+        (l, i) => l.isRedundant() && disappearingLetters.splice(i, 1)
+    )
 
     // Display HUD
     displayHud()
