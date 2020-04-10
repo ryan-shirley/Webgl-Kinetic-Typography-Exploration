@@ -234,7 +234,7 @@ function addLetter(letter) {
 function keyPressed() {
     if (keyCode === BACKSPACE) {
         let removalLetter = letters.pop()
-        disappearingLetters.push(removalLetter)
+        removalLetter && disappearingLetters.push(removalLetter)
     }
 }
 
