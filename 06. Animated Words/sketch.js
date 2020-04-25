@@ -80,12 +80,14 @@ class Letter {
         return (millis() - this.createdAt) / 1000 >= timeToCreate
     }
 }
-
 class Controller {
-    constructor(ballSize = 5, ballSpacing = 10, ballZDepth = ballSpacing) {
-        this.ballSize = ballSize
-        this.ballSpacing = ballSpacing
-        this.ballZDepth = ballZDepth
+    constructor() {
+        this.ballSize = 5
+        this.ballSpacing = 10
+        this.ballZDepth = this.ballSpacing
+        this.floatingPoints = 12 // number of points
+        this.floatingPointAngle = 360 / this.floatingPoints // angle between points
+        this.floatingRadius = 50
     }
 }
 
@@ -213,12 +215,26 @@ function displayHud() {
 function setupGUI() {
     // Create
     gui = new dat.GUI()
-    let spacing = gui.add(controller, "ballSpacing", 10, 20).step(1)
-    gui.add(controller, "ballSize", 1, 15).step(1)
-    gui.add(controller, "ballZDepth", controller.ballSize * 2, 50).step(1)
+
+    // Setup Balls
+    let ballsGUI = gui.addFolder("Balls")
+    let spacing = ballsGUI.add(controller, "ballSpacing", 10, 20).step(1)
+    ballsGUI.add(controller, "ballSize", 1, 15).step(1)
+    ballsGUI.add(controller, "ballZDepth", controller.ballSize * 2, 50).step(1)
+    ballsGUI.open()
 
     // Update ball spacing balls drawn
     spacing.onFinishChange((val) => recalculateSpacing(val))
+
+    // Setup Floating Agents
+    let floatingGUI = gui.addFolder("Floating Points")
+    let fPoints = floatingGUI.add(controller, "floatingPoints", 2, 30).step(2)
+    floatingGUI.add(controller, "floatingRadius", 50, 500).step(10)
+    floatingGUI.open()
+
+    fPoints.onChange(val => {
+        controller.floatingPointAngle = 360 / val
+    })
 }
 
 /**
