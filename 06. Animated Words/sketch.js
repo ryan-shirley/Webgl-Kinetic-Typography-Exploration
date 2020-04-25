@@ -92,24 +92,29 @@ class Agent {
     constructor() {
         this.floatingPoints = 12 // number of points
         this.angle = 360 / this.floatingPoints // angle between points
-        this.radius = 50
+        this.radius = 200
+        this.startAngle = 0
+        this.endAngle = 360
     }
 
     /**
      * draw() Draw points on screen
      */
     draw() {
-        for (let angle = 0; angle < 360; angle = angle + this.angle) {
+        for (let angle = this.startAngle; angle < this.endAngle; angle = angle + this.angle) {
             x = cos(radians(angle)) * this.radius // convert angle to radians for x and y coordinates
             y = sin(radians(angle)) * this.radius
 
             push()
 
-            translate(x + this.radius, y + this.radius, 0)
+            translate(x + this.radius + 100, 300, y - this.radius / 4)
             sphere(controller.ballSize)
 
             pop()
         }
+
+        this.startAngle++
+        this.endAngle++
     }
 }
 
@@ -134,7 +139,7 @@ let font,
 
 // GUI
 let controller = new Controller()
-let agents
+let agents = new Agent()
 let gui
 
 /**
@@ -270,7 +275,6 @@ function setupGUI() {
 function setup() {
     createCanvas(windowWidth, windowHeight, WEBGL)
     setupHud()
-    agents = new Agent()
     setupGUI()
     initText()
     noStroke()
@@ -424,9 +428,9 @@ function draw() {
         l.isRedundant() && disappearingLetters.splice(i, 1)
     })
 
+    // Display HUD
+    // displayHud()
+
     // Draw Agents
     agents.draw()
-
-    // Display HUD
-    displayHud()
 }
