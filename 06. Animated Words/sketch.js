@@ -85,9 +85,47 @@ class Controller {
         this.ballSize = 5
         this.ballSpacing = 10
         this.ballZDepth = this.ballSpacing
+    }
+}
+
+class Agent {
+    constructor() {
+        this.points = []
         this.floatingPoints = 12 // number of points
-        this.floatingPointAngle = 360 / this.floatingPoints // angle between points
-        this.floatingRadius = 50
+        this.angle = 360 / this.floatingPoints // angle between points
+        this.radius = 50
+
+        this.createPoints() // Create initial points
+    }
+
+    /**
+     * createPoints() Create floating points
+     */
+    createPoints() {
+        let points = []
+
+        for (let angle = 0; angle < 360; angle = angle + this.angle) {
+            x = cos(radians(angle)) * this.radius // convert angle to radians for x and y coordinates
+            y = sin(radians(angle)) * this.radius
+
+            points.push(new p5.Vector(x + this.radius, y + this.radius, 0))
+        }
+
+        this.points = points
+    }
+
+    /**
+     * draw() Draw points on screen
+     */
+    draw() {
+        this.points.forEach((pnt) => {
+            push()
+
+            translate(pnt.x, pnt.y, pnt.z)
+            sphere(controller.ballSize)
+
+            pop()
+        })
     }
 }
 
@@ -112,6 +150,7 @@ let font,
 
 // GUI
 let controller = new Controller()
+let agents
 let gui
 
 /**
@@ -228,12 +267,18 @@ function setupGUI() {
 
     // Setup Floating Agents
     let floatingGUI = gui.addFolder("Floating Points")
-    let fPoints = floatingGUI.add(controller, "floatingPoints", 2, 30).step(2)
-    floatingGUI.add(controller, "floatingRadius", 50, 500).step(10)
+    let fPoints = floatingGUI.add(agents, "floatingPoints", 2, 30).step(2)
+    let fRadius = floatingGUI.add(agents, "radius", 50, 500).step(10)
     floatingGUI.open()
 
-    fPoints.onChange(val => {
-        controller.floatingPointAngle = 360 / val
+    fRadius.onChange((val) => {
+        agents.radius = val
+        agents.createPoints()
+    })
+
+    fPoints.onChange((val) => {
+        agents.angle = 360 / val
+        agents.createPoints()
     })
 }
 
@@ -243,6 +288,7 @@ function setupGUI() {
 function setup() {
     createCanvas(windowWidth, windowHeight, WEBGL)
     setupHud()
+    agents = new Agent()
     setupGUI()
     initText()
     noStroke()
@@ -395,6 +441,9 @@ function draw() {
         // Check letters are redundant
         l.isRedundant() && disappearingLetters.splice(i, 1)
     })
+
+    // Draw Agents
+    agents.draw()
 
     // Display HUD
     displayHud()
