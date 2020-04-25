@@ -84,6 +84,7 @@ class Controller {
         this.ballSize = 5
         this.ballSpacing = 10
         this.ballZDepth = this.ballSpacing
+        this.displayGizmos = false
     }
 }
 
@@ -247,6 +248,8 @@ function setupGUI() {
     // Create
     gui = new dat.GUI()
 
+    gui.add(controller, 'displayGizmos')
+
     // Setup Balls
     let ballsGUI = gui.addFolder("Balls")
     let spacing = ballsGUI.add(controller, "ballSpacing", 10, 20).step(1)
@@ -395,7 +398,7 @@ function draw() {
     fill(247, 174, 248)
 
     // gizmo
-    displayGizmo(50)
+    controller.displayGizmos && displayGizmo(100)
 
     // Draw creating letters
     for (let i = 0; i < drawingLetters.length; i++) {
