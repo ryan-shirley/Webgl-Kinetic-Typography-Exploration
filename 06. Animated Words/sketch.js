@@ -3,7 +3,6 @@ class Letter {
     constructor(character, points, offset) {
         this.character = character
         this.points = points
-        this.offset = offset
         this.disappearingStarted
         this.createdAt = millis()
     }
@@ -15,11 +14,7 @@ class Letter {
         this.points.forEach((pnt) => {
             push()
 
-            translate(
-                pnt.x + this.offset,
-                pnt.y,
-                -(pnt.z * controller.ballZDepth)
-            )
+            translate(pnt.x, pnt.y, -(pnt.z * controller.ballZDepth))
             sphere(controller.ballSize)
 
             pop()
@@ -41,28 +36,31 @@ class Letter {
      * create() Draw creating annimation points on screen
      */
     create() {
-        this.points.forEach((pnt) => {
+        if (agents.points.length) {
+            randomSeed(99)
+
             let timeTaken = (millis() - this.createdAt) / 1000,
-                percent = map(timeTaken, 0, timeToCreate, 0, 1),
-                startPos = createVector(
-                    state.center[0],
-                    state.center[1],
-                    state.center[2] + state.distance + 500
-                ),
-                endPos = createVector(
-                    pnt.x + this.offset,
+                percent = map(timeTaken, 0, timeToCreate, 0, 1)
+
+            this.points.forEach((pnt) => {
+                let from =
+                    agents.points[Math.floor(random(0, agents.points.length))]
+                let to = createVector(
+                    pnt.x,
                     pnt.y,
-                    pnt.z * controller.ballSpacing
-                ),
-                lerpedPoint = p5.Vector.lerp(startPos, endPos, percent)
+                    -(pnt.z * controller.ballZDepth)
+                )
 
-            push()
+                let lerpedPoint = p5.Vector.lerp(from, to, percent)
 
-            translate(lerpedPoint.x, lerpedPoint.y, lerpedPoint.z)
-            sphere(controller.ballSize)
+                push()
 
-            pop()
-        })
+                translate(lerpedPoint.x, lerpedPoint.y, lerpedPoint.z)
+                sphere(controller.ballSize)
+
+                pop()
+            })
+        }
     }
 
     /**
@@ -90,9 +88,10 @@ class Controller {
 
 class Agent {
     constructor() {
+        this.points = []
         this.floatingPoints = 12 // number of points
         this.angle = 360 / this.floatingPoints // angle between points
-        this.radius = 200
+        this.radius = 300
         this.startAngle = 0
         this.endAngle = 360
     }
@@ -101,6 +100,8 @@ class Agent {
      * draw() Draw points on screen
      */
     draw() {
+        let points = []
+
         for (
             let angle = this.startAngle;
             angle < this.endAngle;
@@ -111,12 +112,15 @@ class Agent {
 
             push()
 
-            translate(x, 100, y)
+            translate(x, 150, y)
             sphere(controller.ballSize)
 
             pop()
+
+            points.push(new p5.Vector(x, 150, y))
         }
 
+        this.points = points
         this.startAngle = this.startAngle + 0.5
         this.endAngle = this.endAngle + 0.5
     }
@@ -125,7 +129,7 @@ class Agent {
 // Inital camera positioning
 var easycam,
     state = {
-        distance: 500,
+        distance: 800,
         center: [0, 0, 0],
         rotation: [-1, 0, 0, 0],
     },
@@ -138,7 +142,7 @@ let font,
     letters = [],
     drawingLetters = [],
     disappearingLetters = [],
-    timeToCreate = 0.5,
+    timeToCreate = 1.5, // Seconds
     timeToDisappear = 0.5
 
 // GUI
@@ -248,7 +252,7 @@ function setupGUI() {
     // Create
     gui = new dat.GUI()
 
-    gui.add(controller, 'displayGizmos')
+    gui.add(controller, "displayGizmos")
 
     // Setup Balls
     let ballsGUI = gui.addFolder("Balls")
@@ -290,7 +294,9 @@ function setup() {
  * initText() Setup intial text to be drawn
  */
 function initText() {
-    addLetter(initString)
+    setTimeout(() => {
+        addLetter(initString)
+    }, 1000)
 }
 
 /**
