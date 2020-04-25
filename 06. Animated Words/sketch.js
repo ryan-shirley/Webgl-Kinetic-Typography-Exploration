@@ -90,42 +90,26 @@ class Controller {
 
 class Agent {
     constructor() {
-        this.points = []
         this.floatingPoints = 12 // number of points
         this.angle = 360 / this.floatingPoints // angle between points
         this.radius = 50
-
-        this.createPoints() // Create initial points
-    }
-
-    /**
-     * createPoints() Create floating points
-     */
-    createPoints() {
-        let points = []
-
-        for (let angle = 0; angle < 360; angle = angle + this.angle) {
-            x = cos(radians(angle)) * this.radius // convert angle to radians for x and y coordinates
-            y = sin(radians(angle)) * this.radius
-
-            points.push(new p5.Vector(x + this.radius, y + this.radius, 0))
-        }
-
-        this.points = points
     }
 
     /**
      * draw() Draw points on screen
      */
     draw() {
-        this.points.forEach((pnt) => {
+        for (let angle = 0; angle < 360; angle = angle + this.angle) {
+            x = cos(radians(angle)) * this.radius // convert angle to radians for x and y coordinates
+            y = sin(radians(angle)) * this.radius
+
             push()
 
-            translate(pnt.x, pnt.y, pnt.z)
+            translate(x + this.radius, y + this.radius, 0)
             sphere(controller.ballSize)
 
             pop()
-        })
+        }
     }
 }
 
@@ -273,12 +257,10 @@ function setupGUI() {
 
     fRadius.onChange((val) => {
         agents.radius = val
-        agents.createPoints()
     })
 
     fPoints.onChange((val) => {
         agents.angle = 360 / val
-        agents.createPoints()
     })
 }
 
