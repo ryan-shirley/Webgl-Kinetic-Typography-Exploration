@@ -1,9 +1,8 @@
 // Classes
 class Letter {
-    constructor(character, points, letterWidth, offset) {
+    constructor(character, points, offset) {
         this.character = character
         this.points = points
-        this.width = letterWidth
         this.offset = offset
         this.disappearingStarted
         this.createdAt = millis()
@@ -101,20 +100,24 @@ class Agent {
      * draw() Draw points on screen
      */
     draw() {
-        for (let angle = this.startAngle; angle < this.endAngle; angle = angle + this.angle) {
-            x = cos(radians(angle)) * this.radius // convert angle to radians for x and y coordinates
-            y = sin(radians(angle)) * this.radius
+        for (
+            let angle = this.startAngle;
+            angle < this.endAngle;
+            angle = angle + this.angle
+        ) {
+            let x = cos(radians(angle)) * this.radius // convert angle to radians for x and y coordinates
+            let y = sin(radians(angle)) * this.radius
 
             push()
 
-            translate(x + this.radius + 100, 300, y - this.radius / 4)
+            translate(x, 100, y)
             sphere(controller.ballSize)
 
             pop()
         }
 
-        this.startAngle++
-        this.endAngle++
+        this.startAngle = this.startAngle + 0.5
+        this.endAngle = this.endAngle + 0.5
     }
 }
 
@@ -122,7 +125,7 @@ class Agent {
 var easycam,
     state = {
         distance: 500,
-        center: [300, 150, 0],
+        center: [0, 0, 0],
         rotation: [-1, 0, 0, 0],
     },
     x = 0,
@@ -284,42 +287,21 @@ function setup() {
  * initText() Setup intial text to be drawn
  */
 function initText() {
-    for (let i = 0; i < initString.length; i++) {
-        setTimeout(function timer() {
-            addLetter(initString.charAt(i))
-        }, i * 200)
-    }
-}
-
-/**
- * keyTyped() Add letter to text
- */
-function keyTyped() {
-    addLetter(key)
+    addLetter(initString)
 }
 
 /**
  * addLetter() Add letter to be displayed
  */
 function addLetter(letter) {
-    // Calculate offset
-    let offset = 0
-
-    // Drawn letters
-    for (let i = 0; i < letters.length; i++) {
-        offset += letters[i].width
-    }
-
-    // Drawing letters
-    for (let i = 0; i < drawingLetters.length; i++) {
-        offset += drawingLetters[i].width
-    }
-
     // Create Points
     pnts = createPoints(letter)
 
+    // Calculate offset
+    let offset = 0
+
     // Add letter
-    letterObj = new Letter(letter, pnts.points, pnts.letterWidth, offset)
+    letterObj = new Letter(letter, pnts, offset)
     drawingLetters.push(letterObj)
 }
 
@@ -333,7 +315,7 @@ function createPoints(letter) {
     textImg.background(255)
     textImg.textFont(font)
     textImg.textSize(250)
-    textImg.text(letter, 50, 200)
+    textImg.text(letter, 0, 200)
 
     // Load pixels for letter
     textImg.loadPixels()
@@ -348,16 +330,19 @@ function createPoints(letter) {
             if (r < 128) {
                 // Add multiple for depth
                 for (z = 0; z < 3; z++) {
-                    points.push(new p5.Vector(x, y, z))
+                    points.push(
+                        new p5.Vector(
+                            x - textImg.textWidth(letter) / 2,
+                            y - 200,
+                            z
+                        )
+                    )
                 }
             }
         }
     }
 
-    return {
-        points,
-        letterWidth: textImg.textWidth(letter),
-    }
+    return points
 }
 
 /**
@@ -365,21 +350,32 @@ function createPoints(letter) {
  */
 function recalculateSpacing(value) {
     letters.forEach((l, i) => {
-        letters[i].points = createPoints(l.character).points
+        letters[i].points = createPoints(l.character)
     })
 }
 
 /**
- * keyPressed() Handle the removal of letters
+ * displayGizmo() Display axis lines
  */
-function keyPressed() {
-    if (keyCode === BACKSPACE) {
-        let removalLetter = letters.pop()
-        if (removalLetter) {
-            removalLetter.disappearingStarted = millis()
-            disappearingLetters.push(removalLetter)
-        }
-    }
+function displayGizmo(size) {
+    var a = size
+    var b = size / 20
+    var o = a * 0.5
+    push()
+    translate(o, 0, 0)
+    ambientMaterial(255, 0, 0)
+    box(a, b, b)
+    pop()
+    push()
+    translate(0, o, 0)
+    ambientMaterial(0, 255, 0)
+    box(b, a, b)
+    pop()
+    push()
+    translate(0, 0, o)
+    ambientMaterial(0, 0, 255)
+    box(b, b, a)
+    pop()
 }
 
 /**
@@ -397,6 +393,9 @@ function draw() {
     // Create Object material/colour
     // ambientMaterial(215, 151, 216)
     fill(247, 174, 248)
+
+    // gizmo
+    displayGizmo(50)
 
     // Draw creating letters
     for (let i = 0; i < drawingLetters.length; i++) {
@@ -429,7 +428,7 @@ function draw() {
     })
 
     // Display HUD
-    // displayHud()
+    displayHud()
 
     // Draw Agents
     agents.draw()
