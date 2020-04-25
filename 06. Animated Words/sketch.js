@@ -19,7 +19,7 @@ class Letter {
             translate(
                 pnt.x + this.offset,
                 pnt.y,
-                pnt.z * controller.ballSpacing
+                -(pnt.z * controller.ballZDepth)
             )
             sphere(controller.ballSize)
 
@@ -82,9 +82,10 @@ class Letter {
 }
 
 class Controller {
-    constructor(ballSize = 5, ballSpacing = 10) {
+    constructor(ballSize = 5, ballSpacing = 10, ballZDepth = ballSpacing) {
         this.ballSize = ballSize
         this.ballSpacing = ballSpacing
+        this.ballZDepth = ballZDepth
     }
 }
 
@@ -214,6 +215,7 @@ function setupGUI() {
     gui = new dat.GUI()
     let spacing = gui.add(controller, "ballSpacing", 10, 20).step(1)
     gui.add(controller, "ballSize", 1, 15).step(1)
+    gui.add(controller, "ballZDepth", controller.ballSize * 2, 50).step(1)
 
     // Update ball spacing balls drawn
     spacing.onFinishChange((val) => recalculateSpacing(val))
