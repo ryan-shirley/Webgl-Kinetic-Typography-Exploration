@@ -16,8 +16,12 @@ class Letter {
         this.points.forEach((pnt) => {
             push()
 
-            translate(pnt.x + this.offset, pnt.y, pnt.z * pointDensity)
-            sphere(pointDensity / 2)
+            translate(
+                pnt.x + this.offset,
+                pnt.y,
+                pnt.z * controller.ballSpacing
+            )
+            sphere(controller.ballSize)
 
             pop()
         })
@@ -49,14 +53,14 @@ class Letter {
                 endPos = createVector(
                     pnt.x + this.offset,
                     pnt.y,
-                    pnt.z * pointDensity
+                    pnt.z * controller.ballSpacing
                 ),
                 lerpedPoint = p5.Vector.lerp(startPos, endPos, percent)
 
             push()
 
             translate(lerpedPoint.x, lerpedPoint.y, lerpedPoint.z)
-            sphere(pointDensity / 2)
+            sphere(controller.ballSize)
 
             pop()
         })
@@ -77,6 +81,13 @@ class Letter {
     }
 }
 
+class Controller {
+    constructor(ballSize = 5, ballSpacing = 10) {
+        this.ballSize = ballSize
+        this.ballSpacing = ballSpacing
+    }
+}
+
 // Inital camera positioning
 var easycam,
     state = {
@@ -89,14 +100,16 @@ var easycam,
 
 // Type
 let font,
-    textImg,
     initString = "type",
     letters = [],
     drawingLetters = [],
     disappearingLetters = [],
-    pointDensity = 10,
     timeToCreate = 0.5,
     timeToDisappear = 0.5
+
+// GUI
+let controller = new Controller()
+let gui
 
 /**
  * preload() Run before setup
@@ -194,11 +207,25 @@ function displayHud() {
 }
 
 /**
+ * setupGUI() Setup GUI to control elements
+ */
+function setupGUI() {
+    // Create
+    gui = new dat.GUI()
+    let spacing = gui.add(controller, "ballSpacing", 10, 20).step(1)
+    gui.add(controller, "ballSize", 1, 15).step(1)
+
+    // Update ball spacing balls drawn
+    spacing.onFinishChange((val) => recalculateSpacing(val))
+}
+
+/**
  * setup() Initial method run to setup project
  */
 function setup() {
     createCanvas(windowWidth, windowHeight, WEBGL)
     setupHud()
+    setupGUI()
     initText()
     noStroke()
 }
@@ -223,17 +250,6 @@ function keyTyped() {
  * addLetter() Add letter to be displayed
  */
 function addLetter(letter) {
-    // Create Graphic
-    textImg = createGraphics(width, height)
-    textImg.pixelDensity(1)
-    textImg.background(255)
-    textImg.textFont(font)
-    textImg.textSize(250)
-    textImg.text(letter, 50, 200)
-
-    // Load pixels for letter
-    textImg.loadPixels()
-
     // Calculate offset
     let offset = 0
 
@@ -248,10 +264,32 @@ function addLetter(letter) {
     }
 
     // Create Points
+    pnts = createPoints(letter)
+
+    // Add letter
+    letterObj = new Letter(letter, pnts.points, pnts.letterWidth, offset)
+    drawingLetters.push(letterObj)
+}
+
+/**
+ * createPoints() Handle creation of points
+ */
+function createPoints(letter) {
+    // Create Graphic
+    let textImg = createGraphics(width, height)
+    textImg.pixelDensity(1)
+    textImg.background(255)
+    textImg.textFont(font)
+    textImg.textSize(250)
+    textImg.text(letter, 50, 200)
+
+    // Load pixels for letter
+    textImg.loadPixels()
+
     points = []
 
-    for (let x = 0; x < textImg.width; x += pointDensity) {
-        for (let y = 0; y < textImg.height; y += pointDensity) {
+    for (let x = 0; x < textImg.width; x += controller.ballSpacing) {
+        for (let y = 0; y < textImg.height; y += controller.ballSpacing) {
             let index = (x + y * textImg.width) * 4
             let r = textImg.pixels[index]
 
@@ -264,9 +302,19 @@ function addLetter(letter) {
         }
     }
 
-    // Add letter
-    letterObj = new Letter(letter, points, textImg.textWidth(letter), offset)
-    drawingLetters.push(letterObj)
+    return {
+        points,
+        letterWidth: textImg.textWidth(letter),
+    }
+}
+
+/**
+ * recalculateSpacing() Recalculate spacing of balls on drawn letters
+ */
+function recalculateSpacing(value) {
+    letters.forEach((l, i) => {
+        letters[i].points = createPoints(l.character).points
+    })
 }
 
 /**
