@@ -155,7 +155,7 @@ function setupHud() {
     }
 
     // set initial camera state
-    easycam.setState(state, 1000) // animate to state in 1 second
+    easycam.setState(state)
     easycam.state_reset = state // state to use on reset
 
     // use the loaded font
@@ -236,8 +236,10 @@ function setup() {
  * initText() Setup intial text to be drawn
  */
 function initText() {
-    for (var i = 0; i < initString.length; i++) {
-        addLetter(initString.charAt(i))
+    for (let i = 0; i < initString.length; i++) {
+        setTimeout(function timer() {
+            addLetter(initString.charAt(i))
+        }, i * 200)
     }
 }
 
