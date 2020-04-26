@@ -229,6 +229,12 @@ function displayHud() {
     if (letters) {
         numPoints = letters.points.length
     }
+    if (drawingLetters) {
+        numPoints = drawingLetters.points.length
+    }
+    if (disappearingLetters) {
+        numPoints = disappearingLetters.points.length
+    }
 
     // Render the background box for the HUD
     noStroke()
@@ -321,9 +327,7 @@ function addNextWord() {
         nextWord = words[controller.currentWordIndex]
 
     // Create Points
-    pnts = createPoints(
-        nextWord
-    )
+    pnts = createPoints(nextWord)
 
     // Add Word
     drawingLetters = new Letter(nextWord, pnts)
