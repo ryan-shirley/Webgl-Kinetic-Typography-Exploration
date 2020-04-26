@@ -94,6 +94,7 @@ class Letter {
 class Controller {
     constructor() {
         this.words = "design, type"
+        this.currentWordIndex = 0
         this.ballSize = 5
         this.ballSpacing = 10
         this.ballZDepth = this.ballSpacing
@@ -308,22 +309,30 @@ function setup() {
     noStroke()
 
     setTimeout(() => {
-        addLetter(controller.words.split(", ")[0])
+        addNextWord()
     }, 1000)
 }
 
 /**
- * addLetter() Add letter to be displayed
+ * addNextWord() Add next word to be displayed
  */
-function addLetter(letter) {
-    // Create Points
-    pnts = createPoints(letter)
+function addNextWord() {
+    let words = controller.words.split(", "),
+        nextWord = words[controller.currentWordIndex]
 
-    // Calculate offset
-    let offset = 0
+    // Create Points
+    pnts = createPoints(
+        nextWord
+    )
 
     // Add Word
-    drawingLetters = new Letter(letter, pnts, offset)
+    drawingLetters = new Letter(nextWord, pnts)
+
+    if (words.length - 1 > controller.currentWordIndex) {
+        controller.currentWordIndex++
+    } else {
+        controller.currentWordIndex = 0
+    }
 }
 
 /**
@@ -370,7 +379,7 @@ function createPoints(letter) {
  * recalculateSpacing() Recalculate spacing of balls on drawn letters
  */
 function recalculateSpacing(value) {
-    if(letters) {
+    if (letters) {
         letters.points = createPoints(letters.character)
     }
 }
@@ -454,6 +463,7 @@ function draw() {
         // Check letters are redundant
         if (disappearingLetters.isRedundant()) {
             disappearingLetters = null
+            addNextWord()
         }
     }
 
