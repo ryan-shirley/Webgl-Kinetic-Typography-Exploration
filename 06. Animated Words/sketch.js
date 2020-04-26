@@ -40,7 +40,7 @@ class Letter {
             randomSeed(99)
 
             let timeTaken = (millis() - this.createdAt) / 1000,
-                percent = map(timeTaken, 0, timeToCreate, 0, 1)
+                percent = map(timeTaken, 0, controller.createDuration, 0, 1)
 
             this.points.forEach((pnt) => {
                 let from =
@@ -67,14 +67,14 @@ class Letter {
      * isRedundant() Check if letter is redundant
      */
     isRedundant() {
-        return (millis() - this.disappearingStarted) / 1000 >= timeToDisappear
+        return (millis() - this.disappearingStarted) / 1000 >= controller.disappearDuration
     }
 
     /**
      * isCreated() Check if letter is created and in place
      */
     isCreated() {
-        return (millis() - this.createdAt) / 1000 >= timeToCreate
+        return (millis() - this.createdAt) / 1000 >= controller.createDuration
     }
 }
 class Controller {
@@ -83,13 +83,15 @@ class Controller {
         this.ballSpacing = 10
         this.ballZDepth = this.ballSpacing
         this.displayGizmos = false
+        this.createDuration = 1.5 // Seconds
+        this.disappearDuration = 0.5 // Seconds
     }
 }
 
 class Agent {
     constructor() {
         this.points = []
-        this.floatingPoints = 12 // number of points
+        this.floatingPoints = 30 // number of points
         this.angle = 360 / this.floatingPoints // angle between points
         this.radius = 300
         this.startAngle = 0
@@ -121,8 +123,8 @@ class Agent {
         }
 
         this.points = points
-        this.startAngle = this.startAngle + 0.5
-        this.endAngle = this.endAngle + 0.5
+        this.startAngle = this.startAngle + 0.25
+        this.endAngle = this.endAngle + 0.25
     }
 }
 
@@ -141,9 +143,7 @@ let font,
     initString = "type",
     letters = [],
     drawingLetters = [],
-    disappearingLetters = [],
-    timeToCreate = 1.5, // Seconds
-    timeToDisappear = 0.5
+    disappearingLetters = []
 
 // GUI
 let controller = new Controller()
@@ -277,6 +277,12 @@ function setupGUI() {
     fPoints.onChange((val) => {
         agents.angle = 360 / val
     })
+
+    // Setup Animation
+    let animationGUI = gui.addFolder("Animation")
+    animationGUI.add(controller, "createDuration", .5, 5)
+    animationGUI.add(controller, "disappearDuration", .5, 5)
+    animationGUI.open()
 }
 
 /**
