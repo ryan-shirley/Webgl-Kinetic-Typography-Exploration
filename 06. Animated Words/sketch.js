@@ -1,9 +1,8 @@
 // Classes
 class Letter {
-    constructor(character, points, offset) {
+    constructor(character, points) {
         this.character = character
         this.points = points
-        this.disappearingStarted
         this.createdAt = millis()
     }
 
@@ -64,10 +63,25 @@ class Letter {
     }
 
     /**
-     * isRedundant() Check if letter is redundant
+     * isRedundant() Check if word is redundant
      */
     isRedundant() {
-        return (millis() - this.disappearingStarted) / 1000 >= controller.disappearDuration
+        return (
+            (millis() - this.createdAt) / 1000 >=
+            controller.createDuration +
+                controller.displayDuration +
+                controller.disappearDuration
+        )
+    }
+
+    /**
+     * isReadyToRemove() Check if word is ready to disappear
+     */
+    isReadyToRemove() {
+        return (
+            (millis() - this.createdAt) / 1000 >=
+            controller.createDuration + controller.displayDuration
+        )
     }
 
     /**
@@ -79,12 +93,14 @@ class Letter {
 }
 class Controller {
     constructor() {
+        this.words = "design, type"
         this.ballSize = 5
         this.ballSpacing = 10
         this.ballZDepth = this.ballSpacing
         this.displayGizmos = false
         this.createDuration = 1.5 // Seconds
         this.disappearDuration = 0.5 // Seconds
+        this.displayDuration = 3 // Secodns
     }
 }
 
@@ -139,11 +155,7 @@ var easycam,
     y = 20
 
 // Type
-let font,
-    initString = "type",
-    letters = [],
-    drawingLetters = [],
-    disappearingLetters = []
+let font, letters, drawingLetters, disappearingLetters
 
 // GUI
 let controller = new Controller()
@@ -212,10 +224,9 @@ function displayHud() {
 
     // Get number of points
     let numPoints = 0
-    for (let l = 0; l < letters.length; l++) {
-        let letter = letters[l]
 
-        numPoints += letter.points.length
+    if (letters) {
+        numPoints = letters.points.length
     }
 
     // Render the background box for the HUD
@@ -253,6 +264,7 @@ function setupGUI() {
     gui = new dat.GUI()
 
     gui.add(controller, "displayGizmos")
+    gui.add(controller, "words")
 
     // Setup Balls
     let ballsGUI = gui.addFolder("Balls")
@@ -280,8 +292,9 @@ function setupGUI() {
 
     // Setup Animation
     let animationGUI = gui.addFolder("Animation")
-    animationGUI.add(controller, "createDuration", .5, 5)
-    animationGUI.add(controller, "disappearDuration", .5, 5)
+    animationGUI.add(controller, "createDuration", 0.5, 5)
+    animationGUI.add(controller, "disappearDuration", 0.5, 5)
+    animationGUI.add(controller, "displayDuration", 1, 10)
     animationGUI.open()
 }
 
@@ -292,16 +305,10 @@ function setup() {
     createCanvas(windowWidth, windowHeight, WEBGL)
     setupHud()
     setupGUI()
-    initText()
     noStroke()
-}
 
-/**
- * initText() Setup intial text to be drawn
- */
-function initText() {
     setTimeout(() => {
-        addLetter(initString)
+        addLetter(controller.words.split(", ")[0])
     }, 1000)
 }
 
@@ -315,9 +322,8 @@ function addLetter(letter) {
     // Calculate offset
     let offset = 0
 
-    // Add letter
-    letterObj = new Letter(letter, pnts, offset)
-    drawingLetters.push(letterObj)
+    // Add Word
+    drawingLetters = new Letter(letter, pnts, offset)
 }
 
 /**
@@ -412,35 +418,44 @@ function draw() {
     // gizmo
     controller.displayGizmos && displayGizmo(100)
 
-    // Draw creating letters
-    for (let i = 0; i < drawingLetters.length; i++) {
-        let l = drawingLetters[i]
-
-        // Check letters are redundant
-        if (l.isCreated()) {
-            // Remove
-            drawingLetters.splice(i, 1)
-
+    // Check letters are redundant
+    if (drawingLetters) {
+        if (drawingLetters.isCreated()) {
             // Add to letters
-            letters.push(l)
+            letters = drawingLetters
 
-            break
+            // Remove
+            drawingLetters = null
         } else {
             // Draw
-            l.create()
+            drawingLetters.create()
         }
     }
+
     // Draw letters
-    letters.forEach((l) => l.draw())
+    if (letters) {
+        if (letters.isReadyToRemove()) {
+            // Add to letters
+            disappearingLetters = letters
+
+            // Remove
+            letters = null
+        } else {
+            // Draw
+            letters.draw()
+        }
+    }
 
     // Draw disappearing letters
-    disappearingLetters.forEach((l, i) => {
+    if (disappearingLetters) {
         // Draw
-        l.disappear()
+        disappearingLetters.disappear()
 
         // Check letters are redundant
-        l.isRedundant() && disappearingLetters.splice(i, 1)
-    })
+        if (disappearingLetters.isRedundant()) {
+            disappearingLetters = null
+        }
+    }
 
     // Display HUD
     displayHud()
