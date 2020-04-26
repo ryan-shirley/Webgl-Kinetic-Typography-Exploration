@@ -24,11 +24,45 @@ class Letter {
      * disappear() Draw disappearing points on screen
      */
     disappear() {
+        randomSeed(98)
+
+        let disappearCurrentDuration =
+                (millis() - this.createdAt) / 1000 -
+                controller.createDuration -
+                controller.displayDuration,
+            percent = map(
+                disappearCurrentDuration,
+                0,
+                controller.disappearDuration,
+                0,
+                1
+            ),
+            points = []
+
         // Move Points
-        this.points.forEach((pnt, index) => (this.points[index].y += 10))
+        this.points.forEach((fromPnt, index) => {
+            // Get to point
+            let toX = fromPnt.x + Math.floor(random(-400, 400)),
+                toY = fromPnt.y + Math.floor(random(-700, 700)),
+                toZ = fromPnt.z + Math.floor(random(-150, 150)),
+                lerpedPoint = p5.Vector.lerp(fromPnt, new p5.Vector(toX, toY, toZ), percent)
+
+            points.push(lerpedPoint)
+        })
+
+        // Set Transparency
+        colour.setAlpha(map(percent, 0, 1, 255, 0))
+        fill(colour)
 
         // Draw Points
-        this.draw()
+        points.forEach((pnt) => {
+            push()
+
+            translate(pnt.x, pnt.y, -(pnt.z * controller.ballZDepth))
+            sphere(controller.ballSize)
+
+            pop()
+        })
     }
 
     /**
@@ -120,6 +154,9 @@ class Agent {
      * draw() Draw points on screen
      */
     draw() {
+        colour2.setAlpha(255)
+        fill(colour2)
+
         let points = []
 
         for (
@@ -157,7 +194,7 @@ var easycam,
     y = 20
 
 // Type
-let font, letters, drawingLetters, disappearingLetters
+let font, letters, drawingLetters, disappearingLetters, colour, colour2
 
 // GUI
 let controller = new Controller()
@@ -315,6 +352,8 @@ function setup() {
     setupHud()
     setupGUI()
     noStroke()
+    colour = color(247, 174, 248)
+    colour2 = color(247, 174, 248)
 
     setTimeout(() => {
         addNextWord()
@@ -428,7 +467,8 @@ function draw() {
 
     // Create Object material/colour
     // ambientMaterial(215, 151, 216)
-    fill(247, 174, 248)
+    colour.setAlpha(255)
+    fill(colour)
 
     // gizmo
     controller.displayGizmos && displayGizmo(100)
@@ -443,7 +483,11 @@ function draw() {
             drawingLetters = null
 
             // Animate camera position
-            !controller.freeRoam && easycam.setRotation([0.961, -0.004, -0.274, 0], controller.displayDuration * 1000)
+            !controller.freeRoam &&
+                easycam.setRotation(
+                    [0.961, -0.004, -0.274, 0],
+                    controller.displayDuration * 1000
+                )
         } else {
             // Draw
             drawingLetters.create()
@@ -460,8 +504,13 @@ function draw() {
             letters = null
 
             // Animate camera position
-            !controller.freeRoam && easycam.setDistance(100, controller.disappearDuration * 1000)
-            !controller.freeRoam && easycam.setRotation([-.232, 0, 0.972, 0.004], controller.disappearDuration * 1000)
+            !controller.freeRoam &&
+                easycam.setDistance(100, controller.disappearDuration * 1000)
+            !controller.freeRoam &&
+                easycam.setRotation(
+                    [-0.232, 0, 0.972, 0.004],
+                    controller.disappearDuration * 1000
+                )
         } else {
             // Draw
             letters.draw()
@@ -479,8 +528,17 @@ function draw() {
             addNextWord()
 
             // Animate camera position
-            !controller.freeRoam && easycam.setDistance(800, (controller.createDuration + controller.displayDuration) * 1000)
-            !controller.freeRoam && easycam.setRotation([0.932, 0.002, 0.362, -0.002], controller.createDuration * 1000)
+            !controller.freeRoam &&
+                easycam.setDistance(
+                    800,
+                    (controller.createDuration + controller.displayDuration) *
+                        1000
+                )
+            !controller.freeRoam &&
+                easycam.setRotation(
+                    [0.932, 0.002, 0.362, -0.002],
+                    controller.createDuration * 1000
+                )
         }
     }
 
