@@ -99,8 +99,9 @@ class Controller {
         this.ballSpacing = 10
         this.ballZDepth = this.ballSpacing
         this.displayGizmos = false
+        this.freeRoam = false
         this.createDuration = 1.5 // Seconds
-        this.disappearDuration = 0.5 // Seconds
+        this.disappearDuration = 1.5 // Seconds
         this.displayDuration = 3 // Secodns
     }
 }
@@ -271,6 +272,7 @@ function setupGUI() {
     gui = new dat.GUI()
 
     gui.add(controller, "displayGizmos")
+    gui.add(controller, "freeRoam")
     gui.add(controller, "words")
 
     // Setup Balls
@@ -439,6 +441,9 @@ function draw() {
 
             // Remove
             drawingLetters = null
+
+            // Animate camera position
+            !controller.freeRoam && easycam.setRotation([0.961, -0.004, -0.274, 0], controller.displayDuration * 1000)
         } else {
             // Draw
             drawingLetters.create()
@@ -453,6 +458,9 @@ function draw() {
 
             // Remove
             letters = null
+
+            // Animate camera position
+            !controller.freeRoam && easycam.setRotation([-.232, 0, 0.972, 0.004], controller.disappearDuration * 1000)
         } else {
             // Draw
             letters.draw()
@@ -468,6 +476,9 @@ function draw() {
         if (disappearingLetters.isRedundant()) {
             disappearingLetters = null
             addNextWord()
+
+            // Animate camera position
+            !controller.freeRoam && easycam.setRotation([0.932, 0.002, 0.362, -0.002], controller.createDuration * 1000)
         }
     }
 
