@@ -370,9 +370,9 @@ function createPoints(letter) {
  * recalculateSpacing() Recalculate spacing of balls on drawn letters
  */
 function recalculateSpacing(value) {
-    letters.forEach((l, i) => {
-        letters[i].points = createPoints(l.character)
-    })
+    if(letters) {
+        letters.points = createPoints(letters.character)
+    }
 }
 
 /**
