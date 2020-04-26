@@ -460,6 +460,7 @@ function draw() {
             letters = null
 
             // Animate camera position
+            !controller.freeRoam && easycam.setDistance(100, controller.disappearDuration * 1000)
             !controller.freeRoam && easycam.setRotation([-.232, 0, 0.972, 0.004], controller.disappearDuration * 1000)
         } else {
             // Draw
@@ -478,6 +479,7 @@ function draw() {
             addNextWord()
 
             // Animate camera position
+            !controller.freeRoam && easycam.setDistance(800, (controller.createDuration + controller.displayDuration) * 1000)
             !controller.freeRoam && easycam.setRotation([0.932, 0.002, 0.362, -0.002], controller.createDuration * 1000)
         }
     }
