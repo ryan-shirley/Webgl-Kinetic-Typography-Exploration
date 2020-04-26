@@ -299,9 +299,9 @@ function setupGUI() {
 
     // Setup Animation
     let animationGUI = gui.addFolder("Animation")
-    animationGUI.add(controller, "createDuration", 0.5, 5)
-    animationGUI.add(controller, "disappearDuration", 0.5, 5)
-    animationGUI.add(controller, "displayDuration", 1, 10)
+    animationGUI.add(controller, "createDuration", 0.5, 5).step(0.1)
+    animationGUI.add(controller, "disappearDuration", 0.5, 5).step(0.1)
+    animationGUI.add(controller, "displayDuration", 1, 10).step(0.1)
     animationGUI.open()
 }
 
