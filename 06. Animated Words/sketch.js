@@ -130,13 +130,15 @@ class Controller {
         this.words = "design, type"
         this.currentWordIndex = 0
         this.ballSize = 5
-        this.ballSpacing = 10
+        this.ballSpacing = 12
         this.ballZDepth = this.ballSpacing
         this.displayGizmos = false
         this.freeRoam = false
         this.createDuration = 1.5 // Seconds
         this.disappearDuration = 1.5 // Seconds
         this.displayDuration = 3 // Secodns
+        this.colour = [230, 40, 40]
+        this.colour2 = [135, 135, 135]
     }
 }
 
@@ -311,6 +313,16 @@ function setupGUI() {
     gui.add(controller, "displayGizmos")
     gui.add(controller, "freeRoam")
     gui.add(controller, "words")
+    let c1 = gui.addColor(controller, 'colour')
+    let c2 = gui.addColor(controller, 'colour2')
+
+    c1.onChange((val) => {
+        colour = color(val[0], val[1], val[2])
+    })
+
+    c2.onChange((val) => {
+        colour2 = color(val[0], val[1], val[2])
+    })
 
     // Setup Balls
     let ballsGUI = gui.addFolder("Balls")
@@ -352,8 +364,8 @@ function setup() {
     setupHud()
     setupGUI()
     noStroke()
-    colour = color(247, 174, 248)
-    colour2 = color(247, 174, 248)
+    colour = color(230, 40, 40)
+    colour2 = color(135, 135, 135)
 
     setTimeout(() => {
         addNextWord()
@@ -505,7 +517,7 @@ function draw() {
 
             // Animate camera position
             !controller.freeRoam &&
-                easycam.setDistance(100, controller.disappearDuration * 1000)
+                easycam.setDistance(100, controller.disappearDuration * 1000 / 1.5)
             !controller.freeRoam &&
                 easycam.setRotation(
                     [-0.232, 0, 0.972, 0.004],
@@ -530,7 +542,7 @@ function draw() {
             // Animate camera position
             !controller.freeRoam &&
                 easycam.setDistance(
-                    800,
+                    600,
                     (controller.createDuration + controller.displayDuration) *
                         1000
                 )
